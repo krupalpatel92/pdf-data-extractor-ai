@@ -1,12 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
-import { Upload, FileText, Loader2 } from 'lucide-react';
+import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { Upload, FileText, Loader2 } from "lucide-react";
 
 export function PdfUpload() {
   const [file, setFile] = useState<File | null>(null);
@@ -17,12 +23,12 @@ export function PdfUpload() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type === 'application/pdf') {
+      if (selectedFile.type === "application/pdf") {
         setFile(selectedFile);
         setExtractedData(null);
-        toast.success('PDF file selected successfully');
+        toast.success("PDF file selected successfully");
       } else {
-        toast.error('Please select a valid PDF file');
+        toast.error("Please select a valid PDF file");
         setFile(null);
       }
     }
@@ -30,30 +36,30 @@ export function PdfUpload() {
 
   const handleUpload = async () => {
     if (!file) {
-      toast.error('Please select a PDF file first');
+      toast.error("Please select a PDF file first");
       return;
     }
 
     setIsUploading(true);
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     try {
-      const response = await fetch('http://localhost:3001/api/pdf/extract', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3001/api/pdf/extract", {
+        method: "POST",
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to upload and process PDF');
+        throw new Error("Failed to upload and process PDF");
       }
 
       const data = await response.json();
       setExtractedData(data);
-      toast.success('PDF processed successfully!');
+      toast.success("PDF processed successfully!");
     } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Failed to process PDF. Please try again.');
+      console.error("Upload error:", error);
+      toast.error("Failed to process PDF. Please try again.");
     } finally {
       setIsUploading(false);
     }
@@ -66,12 +72,12 @@ export function PdfUpload() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const droppedFile = e.dataTransfer.files?.[0];
-    if (droppedFile && droppedFile.type === 'application/pdf') {
+    if (droppedFile && droppedFile.type === "application/pdf") {
       setFile(droppedFile);
       setExtractedData(null);
-      toast.success('PDF file selected successfully');
+      toast.success("PDF file selected successfully");
     } else {
-      toast.error('Please drop a valid PDF file');
+      toast.error("Please drop a valid PDF file");
     }
   };
 
@@ -130,7 +136,7 @@ export function PdfUpload() {
                 Processing...
               </>
             ) : (
-              'Upload and Extract Data'
+              "Upload and Extract Data"
             )}
           </Button>
         </CardContent>
