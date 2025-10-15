@@ -66,11 +66,19 @@ Or update the database credentials in `backend/.env` to match your setup.
 
 ### 5. Run the Application
 
+**Option 1: Run both simultaneously (from root):**
+
+```bash
+yarn dev
+```
+
+**Option 2: Run separately:**
+
 **Backend (Terminal 1):**
 
 ```bash
 cd backend
-yarn start:dev
+yarn dev
 ```
 
 **Frontend (Terminal 2):**
@@ -98,16 +106,18 @@ The application will be available at:
 
 ### Backend (`backend/.env`)
 
+- `PORT` - Backend port (default: 3001)
+- `FRONTEND_URL` - Frontend URL for CORS (default: http://localhost:3000)
 - `DB_HOST` - PostgreSQL host (default: localhost)
 - `DB_PORT` - PostgreSQL port (default: 5432)
 - `DB_USERNAME` - Database username
 - `DB_PASSWORD` - Database password
 - `DB_NAME` - Database name
 - `OPENAI_API_KEY` - Your OpenAI API key
-- `PORT` - Backend port (default: 3001)
 
 ### Frontend (`frontend/.env`)
 
+- `PORT` - Frontend port (default: 3000)
 - `NEXT_PUBLIC_API_URL` - Backend API URL (default: http://localhost:3001)
 
 ## API Endpoints

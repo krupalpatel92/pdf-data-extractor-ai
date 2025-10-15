@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"cd frontend && yarn dev\" \"cd backend && yarn start:dev\"",
+    "dev": "concurrently \"cd frontend && yarn dev\" \"cd backend && yarn dev\"",
     "build": "cd frontend && yarn build && cd ../backend && yarn build",
     "install:all": "yarn install && cd frontend && yarn install && cd ../backend && yarn install"
   },

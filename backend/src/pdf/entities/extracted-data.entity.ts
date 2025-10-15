@@ -3,17 +3,17 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
-} from "typeorm";
+} from 'typeorm';
 
-@Entity("extracted_data")
+@Entity('extracted_data')
 export class ExtractedData {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 500 })
   fileName: string;
 
-  @Column("jsonb")
+  @Column('jsonb')
   extractedContent: any;
 
   @CreateDateColumn()
