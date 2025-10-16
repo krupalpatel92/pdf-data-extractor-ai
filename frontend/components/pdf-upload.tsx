@@ -24,7 +24,7 @@ import {
 interface ExtractedDataRecord {
   id: string;
   fileName: string;
-  extractedContent: any;
+  extractedContent: Record<string, unknown>;
   createdAt: string;
 }
 
@@ -35,7 +35,10 @@ export function PdfUpload() {
   const [currentlyProcessing, setCurrentlyProcessing] = useState<string | null>(
     null
   );
-  const [extractedData, setExtractedData] = useState<any>(null);
+  const [extractedData, setExtractedData] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [previousExtractions, setPreviousExtractions] = useState<
     ExtractedDataRecord[]
   >([]);
@@ -46,12 +49,7 @@ export function PdfUpload() {
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-  // Load previous extractions on mount
-  useEffect(() => {
-    loadPreviousExtractions();
-  }, []);
-
-  const loadPreviousExtractions = async () => {
+  const loadPreviousExtractions = async (): Promise<void> => {
     setIsLoadingHistory(true);
     try {
       const response = await fetch(`${apiUrl}/api/pdf/all`);
@@ -65,6 +63,11 @@ export function PdfUpload() {
       setIsLoadingHistory(false);
     }
   };
+
+  // Load previous extractions on mount
+  useEffect(() => {
+    loadPreviousExtractions();
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -106,9 +109,13 @@ export function PdfUpload() {
       try {
         await uploadSingleFile(file);
         toast.success(`${file.name} processed successfully!`);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(`Upload error for ${file.name}:`, error);
-        toast.error(`Failed to process ${file.name}: ${error.message}`);
+        if (error instanceof Error) {
+          toast.error(`Failed to process ${file.name}: ${error.message}`);
+        } else {
+          toast.error(`Failed to process ${file.name}`);
+        }
       }
 
       setUploadQueue((prev) => prev.filter((name) => name !== file.name));
@@ -194,7 +201,7 @@ export function PdfUpload() {
 
   const viewRecord = (record: ExtractedDataRecord) => {
     setSelectedRecord(record);
-    setExtractedData(record);
+    setExtractedData(record.extractedContent);
   };
 
   const formatDate = (dateString: string) => {
@@ -212,7 +219,7 @@ export function PdfUpload() {
       const values = Object.values(data);
 
       // Escape values that contain commas, quotes, or newlines
-      const escapeCSV = (value: any) => {
+      const escapeCSV = (value: unknown) => {
         const stringValue = String(value);
         if (
           stringValue.includes(",") ||
