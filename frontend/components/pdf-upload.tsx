@@ -47,7 +47,7 @@ export function PdfUpload() {
     useState<ExtractedDataRecord | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
   const loadPreviousExtractions = async (): Promise<void> => {
     setIsLoadingHistory(true);
@@ -221,14 +221,17 @@ export function PdfUpload() {
       // Escape values that contain commas, quotes, or newlines
       const escapeCSV = (value: unknown) => {
         const stringValue = String(value);
+        // Replace single line breaks with double line breaks for better readability
+        const formattedValue = stringValue.replace(/\n/g, "\n\n");
+
         if (
-          stringValue.includes(",") ||
-          stringValue.includes('"') ||
-          stringValue.includes("\n")
+          formattedValue.includes(",") ||
+          formattedValue.includes('"') ||
+          formattedValue.includes("\n")
         ) {
-          return `"${stringValue.replace(/"/g, '""')}"`;
+          return `"${formattedValue.replace(/"/g, '""')}"`;
         }
-        return stringValue;
+        return formattedValue;
       };
 
       // Create CSV content
@@ -276,6 +279,73 @@ export function PdfUpload() {
     };
 
     exportToCSV(record as ExtractedDataRecord);
+  };
+
+  const exportAllToCSV = () => {
+    if (previousExtractions.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+
+    try {
+      // Combine all records into a single CSV
+      const allHeaders = new Set<string>();
+
+      // Collect all unique headers
+      previousExtractions.forEach((record) => {
+        Object.keys(record.extractedContent).forEach((key) =>
+          allHeaders.add(key)
+        );
+      });
+
+      const headers = Array.from(allHeaders);
+
+      // Escape function with double line breaks
+      const escapeCSV = (value: unknown) => {
+        const stringValue = String(value ?? "");
+        const formattedValue = stringValue.replace(/\n/g, "\n\n");
+
+        if (
+          formattedValue.includes(",") ||
+          formattedValue.includes('"') ||
+          formattedValue.includes("\n")
+        ) {
+          return `"${formattedValue.replace(/"/g, '""')}"`;
+        }
+        return formattedValue;
+      };
+
+      // Create CSV rows
+      const rows = previousExtractions.map((record) => {
+        return headers
+          .map((header) => {
+            const value = record.extractedContent[header];
+            return escapeCSV(value);
+          })
+          .join(",");
+      });
+
+      // Combine headers and rows
+      const csvContent = [headers.join(","), ...rows].join("\n");
+
+      // Download
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      const timestamp = new Date().toISOString().split("T")[0];
+
+      link.setAttribute("href", url);
+      link.setAttribute("download", `all_extracted_data_${timestamp}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success(`Exported ${previousExtractions.length} records to CSV`);
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export CSV");
+    }
   };
 
   return (
@@ -442,11 +512,19 @@ export function PdfUpload() {
       {/* Previous Extractions */}
       <Card>
         <CardHeader>
-          <div>
-            <CardTitle>Previously Extracted PDFs</CardTitle>
-            <CardDescription>
-              View data from previously processed PDF files
-            </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Previously Extracted PDFs</CardTitle>
+              <CardDescription>
+                View data from previously processed PDF files
+              </CardDescription>
+            </div>
+            {previousExtractions.length > 0 && (
+              <Button variant="outline" size="sm" onClick={exportAllToCSV}>
+                <Download className="h-4 w-4 mr-2" />
+                Export All to CSV
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
