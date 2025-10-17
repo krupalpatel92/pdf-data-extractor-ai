@@ -56,6 +56,9 @@ export function PdfUpload() {
       if (response.ok) {
         const data = await response.json();
         setPreviousExtractions(data);
+      } else if (response.status === 401) {
+        // Handle unauthorized - user needs to login again
+        console.log("Unauthorized - please login again");
       }
     } catch (error) {
       console.error("Failed to load previous extractions:", error);
@@ -156,6 +159,12 @@ export function PdfUpload() {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+
+      // Handle unauthorized error
+      if (response.status === 401) {
+        throw new Error("Session expired. Please login again.");
+      }
+
       throw new Error(errorData.message || "Failed to upload and process PDF");
     }
 
